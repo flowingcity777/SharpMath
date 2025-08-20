@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minute Math</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f9fafb; margin: 0; padding: 20px; }
+    h1 { color: #2563eb; }
+    .container { max-width: 600px; margin: auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    button { padding: 10px 20px; margin: 10px; border: none; border-radius: 8px; background: #2563eb; color: white; cursor: pointer; font-size: 16px; }
+    button:hover { background: #1d4ed8; }
+    .question { font-size: 24px; margin: 15px 0; }
+    input { padding: 8px; font-size: 16px; width: 100px; text-align: center; }
+    #results { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Minute Math</h1>
+    <p>Select difficulty and start practicing your mental math!</p>
+
+    <div id="setup">
+      <label>Choose Difficulty: </label>
+      <select id="difficulty">
+        <option value="easy">Easy (1–10)</option>
+        <option value="medium">Medium (1–50)</option>
+        <option value="hard">Hard (1–100)</option>
+      </select>
+      <br />
+      <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz" style="display:none;">
+      <div id="timer">Time: 60</div>
+      <div id="question" class="question"></div>
+      <input type="number" id="answer" />
+      <button onclick="submitAnswer()">Submit</button>
+      <div id="score">Score: 0</div>
+    </div>
+
+    <div id="results"></div>
+  </div>
+
+  <script>
+    let timeLeft = 60;
+    let timer;
+    let score = 0;
+    let currentQuestion;
+    let correctAnswer;
+    let questions = [];
+    let answers = [];
+
+    function randomInt(max) { return Math.floor(Math.random() * max) + 1; }
+
+    function generateQuestion(level) {
+      let max;
+      if (level === "easy") max = 10;
+      else if (level === "medium") max = 50;
+      else max = 100;
+
+      let a = randomInt(max);
+      let b = randomInt(max);
+      let ops = ["+","-","×","÷"];
+      let op = ops[Math.floor(Math.random()*ops.length)];
+
+      if (op === "+") correctAnswer = a + b;
+      if (op === "-") correctAnswer = a - b;
+      if (op === "×") correctAnswer = a * b;
+      if (op === "÷") {
+        correctAnswer = a; // ensure divisible
+        b = randomInt(max);
+        a = correctAnswer * b;
+      }
+
+      currentQuestion = `${a} ${op} ${b} = ?`;
+      document.getElementById("question").textContent = currentQuestion;
+    }
+
+    function startQuiz() {
+      document.getElementById("setup").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      score = 0;
+      timeLeft = 60;
+      questions = [];
+      answers = [];
+      document.getElementById("score").textContent = "Score: 0";
+      timer = setInterval(updateTimer, 1000);
+      generateQuestion(document.getElementById("difficulty").value);
+    }
+
+    function updateTimer() {
+      timeLeft--;
+      document.getElementById("timer").textContent = "Time: " + timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timer);
+        endQuiz();
+      }
+    }
+
+    function submitAnswer() {
+      let ans = parseFloat(document.getElementById("answer").value);
+      if (ans === correctAnswer) score++;
+      questions.push(currentQuestion);
+      answers.push({given: ans, correct: correctAnswer});
+      document.getElementById("score").textContent = "Score: " + score;
+      document.getElementById("answer").value = "";
+      generateQuestion(document.getElementById("difficulty").value);
+    }
+
+    function endQuiz() {
+      document.getElementById("quiz").style.display = "none";
+      let resultHTML = `<h2>Time's Up!</h2><p>Your Score: ${score}</p><h3>Answer Key:</h3><ul>`;
+      answers.forEach((a, i) => {
+        resultHTML += `<li>${questions[i]} Your answer: ${a.given} | Correct: ${a.correct}</li>`;
+      });
+      resultHTML += `</ul>`;
+      document.getElementById("results").innerHTML = resultHTML;
+    }
+  </script>
+</body>
+</html>
