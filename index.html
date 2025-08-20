@@ -26,6 +26,7 @@
     .question { font-size: 24px; margin: 15px 0; }
     input { padding: 8px; font-size: 16px; width: 100px; text-align: center; }
     #results { margin-top: 20px; }
+    #limitMsg { color: red; font-weight: bold; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -41,7 +42,8 @@
         <option value="hard">Hard (1–100)</option>
       </select>
       <br />
-      <button onclick="startQuiz()">Start Quiz</button>
+      <button onclick="checkLimitAndStart()">Start Quiz</button>
+      <p id="limitMsg"></p>
     </div>
 
     <div id="quiz" style="display:none;">
@@ -63,6 +65,30 @@
     let correctAnswer;
     let questions = [];
     let answers = [];
+    let dailyLimitMinutes = 15; // Max 15 minutes per day
+
+    // Helper: get today's date string
+    function todayStr() {
+      let d = new Date();
+      return d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+    }
+
+    // Check daily limit before starting
+    function checkLimitAndStart() {
+      let record = JSON.parse(localStorage.getItem("sharpMathUsage")) || {};
+      let today = todayStr();
+
+      if (!record.date || record.date !== today) {
+        record = { date: today, minutes: 0 };
+      }
+
+      if (record.minutes >= dailyLimitMinutes) {
+        document.getElementById("limitMsg").textContent = `Daily limit reached (${dailyLimitMinutes} minutes). Please come back tomorrow!`;
+        return;
+      }
+
+      startQuiz(record);
+    }
 
     function randomInt(max) { return Math.floor(Math.random() * max) + 1; }
 
@@ -90,7 +116,7 @@
       document.getElementById("question").textContent = currentQuestion;
     }
 
-    function startQuiz() {
+    function startQuiz(record) {
       document.getElementById("setup").style.display = "none";
       document.getElementById("quiz").style.display = "block";
       document.getElementById("results").innerHTML = "";
@@ -99,16 +125,16 @@
       questions = [];
       answers = [];
       document.getElementById("score").textContent = "Score: 0";
-      timer = setInterval(updateTimer, 1000);
+      timer = setInterval(() => updateTimer(record), 1000);
       generateQuestion(document.getElementById("difficulty").value);
     }
 
-    function updateTimer() {
+    function updateTimer(record) {
       timeLeft--;
       document.getElementById("timer").textContent = "Time: " + timeLeft;
       if (timeLeft <= 0) {
         clearInterval(timer);
-        endQuiz();
+        endQuiz(record);
       }
     }
 
@@ -122,7 +148,7 @@
       generateQuestion(document.getElementById("difficulty").value);
     }
 
-    function endQuiz() {
+    function endQuiz(record) {
       document.getElementById("quiz").style.display = "none";
       let resultHTML = `<h2>Time's Up!</h2><p>Your Score: ${score}</p><h3>Answer Key:</h3><ul>`;
       answers.forEach((a, i) => {
@@ -131,6 +157,14 @@
       resultHTML += `</ul>`;
       resultHTML += `<button onclick=\"restartQuiz()\">Play Again</button>`;
       document.getElementById("results").innerHTML = resultHTML;
+
+      // Update daily record
+      let today = todayStr();
+      if (!record.date || record.date !== today) {
+        record = { date: today, minutes: 0 };
+      }
+      record.minutes += 1; // each round = 1 minute
+      localStorage.setItem("sharpMathUsage", JSON.stringify(record));
     }
 
     function restartQuiz() {
