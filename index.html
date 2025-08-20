@@ -3,10 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minute Math</title>
+  <title>SharpMath</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧮</text></svg>">
   <style>
     body { font-family: Arial, sans-serif; text-align: center; background: #f9fafb; margin: 0; padding: 20px; }
-    h1 { color: #2563eb; }
+    h1 { 
+      font-size: 3em;
+      font-weight: bold;
+      background: linear-gradient(90deg, #2563eb, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    .tagline {
+      font-size: 1.2em;
+      color: #4b5563;
+      margin-bottom: 20px;
+    }
     .container { max-width: 600px; margin: auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     button { padding: 10px 20px; margin: 10px; border: none; border-radius: 8px; background: #2563eb; color: white; cursor: pointer; font-size: 16px; }
     button:hover { background: #1d4ed8; }
@@ -17,8 +30,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>Minute Math</h1>
-    <p>Select difficulty and start practicing your mental math!</p>
+    <h1>SharpMath 🧮</h1>
+    <p class="tagline">Sharpen your mental math skills — one minute at a time!</p>
 
     <div id="setup">
       <label>Choose Difficulty: </label>
@@ -80,6 +93,7 @@
     function startQuiz() {
       document.getElementById("setup").style.display = "none";
       document.getElementById("quiz").style.display = "block";
+      document.getElementById("results").innerHTML = "";
       score = 0;
       timeLeft = 60;
       questions = [];
@@ -115,7 +129,13 @@
         resultHTML += `<li>${questions[i]} Your answer: ${a.given} | Correct: ${a.correct}</li>`;
       });
       resultHTML += `</ul>`;
+      resultHTML += `<button onclick=\"restartQuiz()\">Play Again</button>`;
       document.getElementById("results").innerHTML = resultHTML;
+    }
+
+    function restartQuiz() {
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("setup").style.display = "block";
     }
   </script>
 </body>
