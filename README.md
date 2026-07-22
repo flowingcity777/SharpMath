@@ -1,4 +1,4 @@
-# SharpMath
+# Sharp Math
 
 Interactive educational quiz application designed to help students practice mental math and arithmetic skills through lightweight exercises.
 
